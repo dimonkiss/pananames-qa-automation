@@ -42,8 +42,12 @@ export class ContactsPage {
   }
 
   private async showMaxContactsPerPage() {
+    const refetched = this.page.waitForResponse(
+      (response) => response.url().includes('/api/contacts') && response.url().includes('per_page=100'),
+    );
     await this.page.locator('.va-select').click();
     await this.page.getByRole('option', { name: '100' }).click();
+    await refetched;
   }
 
   async reload() {
@@ -72,8 +76,7 @@ export class ContactsPage {
       if (shouldBeChecked === undefined) continue;
       const checkbox = this.page.getByLabel(CHECKBOX_LABELS[key]);
       if ((await checkbox.isChecked()) !== shouldBeChecked) {
-        // The visible checkbox square overlays the real input, so a plain click is intercepted.
-        await checkbox.click({ force: true });
+        await this.page.locator('label.va-checkbox__label').filter({ hasText: CHECKBOX_LABELS[key] }).click();
       }
     }
   }
@@ -117,6 +120,28 @@ export class ContactsPage {
     await this.getRow(name).locator('td').nth(3).locator('button').click();
     await this.page.getByRole('button', { name: 'OK' }).click();
     await expect(this.getRow(name)).toHaveCount(0);
+  }
+
+  async deleteAllContacts(attempt = 1) {
+    await this.goto();
+    const deleteButtons = this.page.locator('table tr td:nth-child(4) button');
+
+    let remaining = await deleteButtons.count();
+    while (remaining > 0) {
+      await deleteButtons.first().click();
+      await this.page.getByRole('button', { name: 'OK' }).click();
+      await expect(deleteButtons).toHaveCount(remaining - 1);
+      remaining = await deleteButtons.count();
+    }
+
+    await this.reload();
+    const leftAfterReload = await deleteButtons.count();
+    if (leftAfterReload > 0) {
+      if (attempt >= 5) {
+        throw new Error(`deleteAllContacts: ${leftAfterReload} contact(s) still present after ${attempt} attempts`);
+      }
+      await this.deleteAllContacts(attempt + 1);
+    }
   }
 
   async getCheckboxStates(name: string): Promise<ContactCheckboxes> {
