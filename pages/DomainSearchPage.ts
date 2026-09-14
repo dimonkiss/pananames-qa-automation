@@ -23,6 +23,7 @@ export class DomainSearchPage {
   async search(query: string) {
     await this.searchInput.fill(query);
     await this.searchButton.click();
+    await this.results.first().waitFor({ state: 'visible' });
   }
 
   getResult(domain: string): Locator {
@@ -55,5 +56,22 @@ export class DomainSearchPage {
 
   async proceedToCart() {
     await this.proceedToCartButton.click();
+  }
+
+  /** Returns the full domain names (e.g. "foo.com") of the first `limit` available results. */
+  async getAvailableDomains(limit: number): Promise<string[]> {
+    const count = await this.results.count();
+    const domains: string[] = [];
+
+    for (let i = 0; i < count && domains.length < limit; i++) {
+      const item = this.results.nth(i);
+      const buttonText = (await item.locator('button').textContent())?.trim();
+      if (buttonText !== 'Add to cart') continue;
+
+      const name = (await item.locator('.domain-name').textContent())?.trim();
+      if (name) domains.push(name);
+    }
+
+    return domains;
   }
 }
