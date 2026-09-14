@@ -44,9 +44,57 @@ test.describe('Contacts - edit', () => {
 
     await contacts.editContact(name, { lastName: 'Updated', email: updatedEmail });
 
-    await page.reload();
+    await contacts.reload();
     const row = contacts.getRow(name);
     await expect(row).toContainText(updatedEmail);
+  });
+});
+
+test.describe('Contacts - checkbox state', () => {
+  test('should persist checkbox state after creation and after an update', async ({ page }) => {
+    const contacts = new ContactsPage(page);
+    const name = uniqueContactName('QA Checkbox');
+
+    await contacts.goto();
+    await contacts.createContact({
+      name,
+      firstName: 'Checkbox',
+      lastName: 'State',
+      email: uniqueEmail('qa.checkbox'),
+      phoneCountry: 'Ukraine',
+      phoneNumber: '501234567',
+      checkboxes: {
+        allowSupportRequests: true,
+        sendPromotionalEmails: false,
+        sendProductEmails: true,
+        sendFinancialEmails: false,
+      },
+    });
+
+    const statesAfterCreate = await contacts.getCheckboxStates(name);
+    expect(statesAfterCreate).toEqual({
+      allowSupportRequests: true,
+      sendPromotionalEmails: false,
+      sendProductEmails: true,
+      sendFinancialEmails: false,
+    });
+
+    await contacts.editContact(name, {
+      checkboxes: {
+        allowSupportRequests: false,
+        sendPromotionalEmails: true,
+        sendProductEmails: false,
+        sendFinancialEmails: true,
+      },
+    });
+
+    const statesAfterUpdate = await contacts.getCheckboxStates(name);
+    expect(statesAfterUpdate).toEqual({
+      allowSupportRequests: false,
+      sendPromotionalEmails: true,
+      sendProductEmails: false,
+      sendFinancialEmails: true,
+    });
   });
 });
 
@@ -68,7 +116,7 @@ test.describe('Contacts - delete', () => {
 
     await contacts.deleteContact(name);
 
-    await page.reload();
+    await contacts.reload();
     await expect(contacts.getRow(name)).toHaveCount(0);
   });
 });

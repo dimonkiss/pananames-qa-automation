@@ -38,6 +38,17 @@ export class ContactsPage {
 
   async goto() {
     await this.page.goto('/contacts');
+    await this.showMaxContactsPerPage();
+  }
+
+  private async showMaxContactsPerPage() {
+    await this.page.locator('.va-select').click();
+    await this.page.getByRole('option', { name: '100' }).click();
+  }
+
+  async reload() {
+    await this.page.reload();
+    await this.showMaxContactsPerPage();
   }
 
   getRow(name: string): Locator {
@@ -84,6 +95,7 @@ export class ContactsPage {
     await this.fillForm(data);
     await this.page.getByRole('button', { name: 'Create' }).click();
     await expect(this.page).toHaveURL(/\/contacts$/);
+    await this.showMaxContactsPerPage();
   }
 
   /** The edit form loads existing contact data asynchronously; filling too early gets overwritten once it arrives. */
@@ -98,6 +110,7 @@ export class ContactsPage {
     await this.fillForm(data);
     await this.page.getByRole('button', { name: 'Save' }).click();
     await expect(this.page).toHaveURL(/\/contacts$/);
+    await this.showMaxContactsPerPage();
   }
 
   async deleteContact(name: string) {
