@@ -19,10 +19,15 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
+  /* Log in once before the whole suite and reuse the session. */
+  globalSetup: require.resolve('./fixtures/global-setup'),
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
     baseURL: process.env.BASE_URL,
+
+    /* Reuse the authenticated session saved by global setup. */
+    storageState: 'playwright/.auth/user.json',
 
     /* Collect trace only when a test fails. See https://playwright.dev/docs/trace-viewer */
     trace: 'retain-on-failure',
