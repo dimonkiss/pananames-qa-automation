@@ -138,7 +138,9 @@ export class ContactsPage {
     const leftAfterReload = await deleteButtons.count();
     if (leftAfterReload > 0) {
       if (attempt >= 5) {
-        throw new Error(`deleteAllContacts: ${leftAfterReload} contact(s) still present after ${attempt} attempts`);
+        throw new Error(
+          `deleteAllContacts: ${leftAfterReload} contact(s) still present after ${attempt} attempts`,
+        );
       }
       await this.deleteAllContacts(attempt + 1);
     }

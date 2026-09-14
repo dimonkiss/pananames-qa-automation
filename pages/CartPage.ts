@@ -15,9 +15,7 @@ export class CartPage {
   }
 
   async goto() {
-    const cartLoaded = this.page.waitForResponse(
-      (response) => response.url().includes('/api/cart/get'),
-    );
+    const cartLoaded = this.page.waitForResponse((response) => response.url().includes('/api/cart/get'));
     await this.page.goto('/cart');
     await cartLoaded;
   }
