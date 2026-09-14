@@ -41,6 +41,16 @@ export class DomainSearchPage {
 
   async addToCart(domain: string) {
     await this.getResult(domain).getByRole('button', { name: 'Add to cart' }).click();
+
+    // Some TLDs (e.g. .net) show a "Registration notice" dialog that must be confirmed
+    // before the domain is actually added; other TLDs skip it entirely.
+    const agreeButton = this.page.getByRole('button', { name: 'I AGREE, ADD DOMAIN TO CART' });
+    try {
+      await agreeButton.waitFor({ state: 'visible', timeout: 3000 });
+      await agreeButton.click();
+    } catch {
+      // no registration notice for this TLD, nothing to confirm
+    }
   }
 
   async proceedToCart() {

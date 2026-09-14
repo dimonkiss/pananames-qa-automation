@@ -11,3 +11,7 @@ export function uniqueContactName(prefix: string): string {
 export function uniqueEmail(prefix: string): string {
   return `${prefix}.${randomLetters(8)}@example.com`;
 }
+
+export function uniqueSld(prefix: string): string {
+  return `${prefix}${randomLetters(8)}`;
+}
