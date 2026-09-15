@@ -11,7 +11,7 @@
 Встановити залежності:
 
 ```bash
-npx playwright test
+npm install
 ```
 
 Встановити браузер Chromium, яким керує Playwright:
@@ -37,7 +37,7 @@ USER_PASSWORD=your-password
 ## Запуск тестів
 
 ```bash
-npm test
+npx playwright test
 ```
 
 Тести виконуються послідовно (`workers: 1`), а не паралельно. Всі тести працюють зі спільним для акаунту списком контактів і кошиком, і після кожного тесту cleanup прибирає геть усе в обох списках.
